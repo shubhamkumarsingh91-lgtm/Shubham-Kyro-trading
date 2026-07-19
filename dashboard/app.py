@@ -35,10 +35,14 @@ ENABLE_SCHEDULER = os.environ.get("ENABLE_SCHEDULER", "false").lower() == "true"
 class BasicAuthMiddleware(BaseHTTPMiddleware):
     """Gates every request, including mounted static files — a route-level
     Depends() would skip the /static mount, which isn't a FastAPI path
-    operation. No-op when DASHBOARD_PASSWORD is unset (local dev)."""
+    operation. No-op when DASHBOARD_PASSWORD is unset (local dev).
+
+    /healthz is exempt: Render's health checker doesn't send credentials,
+    so gating it would make the platform see the service as permanently
+    unhealthy even though it's running fine."""
 
     async def dispatch(self, request: Request, call_next):
-        if not DASHBOARD_PASSWORD:
+        if not DASHBOARD_PASSWORD or request.url.path == "/healthz":
             return await call_next(request)
 
         auth = request.headers.get("Authorization", "")
@@ -87,6 +91,11 @@ def _read_decisions() -> list[dict]:
         if line:
             entries.append(json.loads(line))
     return entries
+
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
 
 
 @app.get("/api/watchlist")
