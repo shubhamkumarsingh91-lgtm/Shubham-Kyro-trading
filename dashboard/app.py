@@ -12,7 +12,9 @@ import json
 import os
 import secrets
 import sys
+import threading
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yfinance as yf
@@ -75,6 +77,22 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Trading Agents Dashboard", lifespan=lifespan)
 app.add_middleware(BasicAuthMiddleware)
 
+_refresh_lock = threading.Lock()
+_refresh_state = {"running": False, "last_started": None, "last_completed": None, "last_error": None}
+
+
+def _run_refresh_in_background():
+    from run_watchlist import refresh_watchlist
+
+    try:
+        refresh_watchlist()
+        _refresh_state["last_error"] = None
+    except Exception as exc:
+        _refresh_state["last_error"] = str(exc)
+    finally:
+        _refresh_state["running"] = False
+        _refresh_state["last_completed"] = datetime.now(timezone.utc).isoformat()
+
 
 def _read_watchlist() -> list[str]:
     if not WATCHLIST_PATH.exists():
@@ -101,6 +119,26 @@ def healthz():
 @app.get("/api/watchlist")
 def get_watchlist():
     return {"watchlist": _read_watchlist()}
+
+
+@app.post("/api/refresh")
+def trigger_refresh():
+    """Run a fresh analysis for the whole watchlist now, instead of waiting
+    for the daily schedule. Same proposal-only pipeline, just on demand."""
+    with _refresh_lock:
+        if _refresh_state["running"]:
+            raise HTTPException(status_code=409, detail="A refresh is already running")
+        _refresh_state["running"] = True
+        _refresh_state["last_started"] = datetime.now(timezone.utc).isoformat()
+
+    thread = threading.Thread(target=_run_refresh_in_background, daemon=True)
+    thread.start()
+    return {"status": "started"}
+
+
+@app.get("/api/refresh/status")
+def refresh_status():
+    return _refresh_state
 
 
 @app.get("/api/decisions")

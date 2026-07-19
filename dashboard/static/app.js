@@ -287,4 +287,60 @@ window.addEventListener("resize", () => {
   }
 });
 
+let pollTimer = null;
+
+async function pollRefreshStatus() {
+  const btn = document.getElementById("refresh-btn");
+  const statusEl = document.getElementById("refresh-status");
+  try {
+    const s = await fetchJSON("/api/refresh/status");
+    if (s.running) {
+      btn.disabled = true;
+      statusEl.textContent = "Running the multi-agent analysis for your watchlist — this can take a few minutes…";
+      statusEl.classList.remove("error");
+    } else {
+      btn.disabled = false;
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        if (s.last_error) {
+          statusEl.textContent = `Last run failed: ${s.last_error}`;
+          statusEl.classList.add("error");
+        } else {
+          statusEl.textContent = "Done — refreshing dashboard…";
+          statusEl.classList.remove("error");
+          await init();
+          statusEl.textContent = "Up to date.";
+        }
+      }
+    }
+  } catch (err) {
+    statusEl.textContent = `Could not check refresh status: ${err.message}`;
+    statusEl.classList.add("error");
+  }
+}
+
+document.getElementById("refresh-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("refresh-btn");
+  const statusEl = document.getElementById("refresh-status");
+  btn.disabled = true;
+  statusEl.classList.remove("error");
+  statusEl.textContent = "Starting…";
+  try {
+    const res = await fetch("/api/refresh", { method: "POST" });
+    if (res.status === 409) {
+      statusEl.textContent = "A refresh is already running.";
+    } else if (!res.ok) {
+      throw new Error(`${res.status}`);
+    }
+    pollTimer = setInterval(pollRefreshStatus, 4000);
+    pollRefreshStatus();
+  } catch (err) {
+    btn.disabled = false;
+    statusEl.textContent = `Failed to start refresh: ${err.message}`;
+    statusEl.classList.add("error");
+  }
+});
+
 init();
+pollRefreshStatus();

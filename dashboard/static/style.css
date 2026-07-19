@@ -87,8 +87,34 @@ header.top .tag {
 .subtitle {
   color: var(--text-secondary);
   font-size: 13px;
-  margin: 4px 0 28px;
+  margin: 4px 0 16px;
 }
+
+.refresh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.refresh-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+.refresh-btn:hover:not(:disabled) { border-color: var(--series-price); }
+.refresh-btn:disabled { color: var(--text-muted); cursor: not-allowed; }
+.refresh-status {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.refresh-status.error { color: var(--critical); }
 
 .subtitle strong { color: var(--text-primary); }
 

@@ -14,8 +14,13 @@
   </header>
   <p class="subtitle">
     Multi-agent debate (market + Kronos forecast, sentiment, news, fundamentals, risk) per watchlist ticker.
-    Run <strong>python run_watchlist.py</strong> in <strong>trading-agents/</strong> to refresh.
+    Refreshes automatically once a day, or run it now below.
   </p>
+
+  <div class="refresh-row">
+    <button id="refresh-btn" class="refresh-btn">Run now</button>
+    <span id="refresh-status" class="refresh-status"></span>
+  </div>
 
   <div id="empty-note" class="empty-note" style="display:none">
     No proposals logged yet. Prices are still live, but decision badges and the Kronos forecast will stay
