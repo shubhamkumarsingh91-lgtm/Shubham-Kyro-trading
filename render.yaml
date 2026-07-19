@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: trading-agents-dashboard
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/watchlist
+    disk:
+      name: dashboard-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /data
+      - key: ENABLE_SCHEDULER
+        value: "true"
+      - key: REFRESH_HOUR_UTC
+        value: "10"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: TRADINGAGENTS_LLM_PROVIDER
+        value: anthropic
+      - key: TRADINGAGENTS_DEEP_THINK_LLM
+        value: claude-sonnet-5
+      - key: TRADINGAGENTS_QUICK_THINK_LLM
+        value: claude-haiku-4-5-20251001

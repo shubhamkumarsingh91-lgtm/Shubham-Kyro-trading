@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Agents Dashboard</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Trading Agents Dashboard</h1>
+    <span class="tag">Kronos-informed · proposal only, nothing executes</span>
+  </header>
+  <p class="subtitle">
+    Multi-agent debate (market + Kronos forecast, sentiment, news, fundamentals, risk) per watchlist ticker.
+    Run <strong>python run_watchlist.py</strong> in <strong>trading-agents/</strong> to refresh.
+  </p>
+
+  <div id="empty-note" class="empty-note" style="display:none">
+    No proposals logged yet. Prices are still live, but decision badges and the Kronos forecast will stay
+    empty until you run <code>python run_watchlist.py</code> in <code>trading-agents/</code>.
+  </div>
+
+  <div id="grid" class="grid">
+    <div class="loading">Loading watchlist…</div>
+  </div>
+
+  <section id="detail" class="detail" style="display:none">
+    <h2 id="detail-ticker">—</h2>
+    <div id="detail-sub" class="detail-sub"></div>
+
+    <div class="chart-card">
+      <div style="position:relative">
+        <canvas id="chart"></canvas>
+        <div id="tooltip" class="tooltip"></div>
+      </div>
+      <div id="chart-error" class="error"></div>
+      <div class="legend">
+        <span class="key"><span class="dot good"></span> Buy / Overweight</span>
+        <span class="key"><span class="dot warning"></span> Hold</span>
+        <span class="key"><span class="dot serious"></span> Underweight</span>
+        <span class="key"><span class="dot critical"></span> Sell</span>
+      </div>
+    </div>
+
+    <div id="reports" class="reports"></div>
+  </section>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

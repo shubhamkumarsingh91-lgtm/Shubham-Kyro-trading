@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+
+# Local data the pipeline generates (not checked in — lives on the Render
+# persistent disk in production, or locally in trading-agents/ during dev)
+decisions_log.jsonl
+*.log
+
+# Editor / OS
+.DS_Store
+.claude/
